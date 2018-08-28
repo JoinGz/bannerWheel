@@ -1,1 +1,5 @@
-console.log(1,800)
+import './main.scss'
+import banner from './banner.js'
+new banner({
+  LR:false
+})

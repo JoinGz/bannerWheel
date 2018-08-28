@@ -28,6 +28,45 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: [require('postcss-import'), require('autoprefixer')]
+            }
+          },
+          'sass-loader'
+        ]
+      },
+      {
+        test: /\.(png|gif|jpg|svg|jpeg)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            query: {
+              name: 'img/[hash:5].[ext]'
+            }
+          }
+          // {
+          //   loader: 'image-webpack-loader', //新增image-webpack-loader
+          //   options: {
+          //     mozjpeg: {
+          //       //设置对jpg格式的图片压缩的程度设置
+          //       progressive: true,
+          //       quality: 65
+          //     },
+          //     optipng: {
+          //       progressive: true,
+          //       quality: 65
+          //     }
+          //   }
+          // }
+        ]
       }
     ]
   },
