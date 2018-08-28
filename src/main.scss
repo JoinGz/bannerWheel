@@ -1,9 +1,22 @@
 #gzBanner {
   position: relative;
+  width: 100%;
+  overflow: hidden;
+  .clearfix:after {
+    display: block;
+    content: '';
+    clear: both;
+  }
   ul,
   li {
     padding: 0;
     margin: 0;
+    list-style: none;
+  }
+  .gzBox {
+    li {
+      float: left;
+    }
   }
   a {
     display: block;
@@ -38,5 +51,9 @@
       display: inline-block;
       margin-right: 5px;
     }
+  }
+  // animation
+  .move {
+    transition: all 2s;
   }
 }
