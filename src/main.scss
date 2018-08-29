@@ -12,6 +12,7 @@
     padding: 0;
     margin: 0;
     list-style: none;
+    position: relative;
   }
   .gzBox {
     li {
@@ -47,9 +48,12 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: rebeccapurple;
+      background: rgba(255,255,255,0.3);
       display: inline-block;
       margin-right: 5px;
+    }
+    .active {
+      background: rgba(255,255,255,0.7);
     }
   }
   // animation
