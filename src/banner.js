@@ -5,7 +5,7 @@ class Banner {
       LR: true,
       control: true,
       model: 'pc',
-      interval: 3000
+      interval: 1000
     }
     this.options = Object.assign(this.default, options)
     this.begin = 0
@@ -46,8 +46,9 @@ class Banner {
       doc.appendChild(ul)
       document.querySelector('#gzBanner').appendChild(doc)
       this.dotShow(0)
+      this.clickDot()
     }
-    if (this.options.model === 'pc') {
+    if (this.options.model === 'pc' && this.options.LR) {
       this.eventListen(this.$('#gzBanner .gzButl'), 'click', this.gzButl())
       this.eventListen(this.$('#gzBanner .gzButr'), 'click', this.gzButr())
     }
@@ -103,8 +104,21 @@ class Banner {
   dotShow(num) {
     document.querySelectorAll('#gzBanner .point li').forEach((v, i) => {
       v.className = ''
+      v.myIndex = i
       if (i == num) {
         v.className = 'active'
+      }
+    })
+  }
+  clickDot() {
+    this.eventListen(this.$('#gzBanner .point'), 'click', (e) => {
+      let ele = e || window.event
+      let target = ele.target || ele.srcElement
+      if (target.nodeName.toLocaleLowerCase() === 'li') {
+        this.animation(this.$('#gzBanner .gzBox'), `${this.liWidth() * target.myIndex * -1}px`, false)
+        this.begin = target.myIndex
+        this.dot = target.myIndex
+        this.dotShow(this.dot)
       }
     })
   }
@@ -114,19 +128,31 @@ class Banner {
     this.mytime = setInterval(() => {
       this.gzButr()()
     }, this.options.interval)
-    window.onfocus = ()=> {
-      // console.log('onfocue')
-      // console.log(this.mytime);
-      clearInterval(this.mytime)
-      this.mytime = setInterval(() => {
-        this.gzButr()()
-      }, this.options.interval)
+    if (this.getVisibilityState()) {
+      let name = this.getHiddenProp()
+      name = name.replace(/hidden/i, 'visibilitychange')
+      this.eventListen(document, name, () => {
+        if (document[this.getHiddenProp()]) {
+          clearInterval(this.mytime)
+        } else {
+          clearInterval(this.mytime)
+          this.mytime = setInterval(() => {
+            this.gzButr()()
+          }, this.options.interval)
+        }
+      })
+    } else {
+      window.onfocus = () => {
+        clearInterval(this.mytime)
+        this.mytime = setInterval(() => {
+          this.gzButr()()
+        }, this.options.interval)
+      }
+      window.onblur = () => {
+        clearInterval(this.mytime)
+      }
     }
-    window.onblur = ()=> {
-      // console.log('onblur');
-      // console.log(this.mytime);
-      clearInterval(this.mytime)
-    }
+
   }
   gzButl() {
     return () => {
@@ -173,6 +199,24 @@ class Banner {
       this.animation(ele, `${this.begin * -this.liWidth()}px`, false)
       this.dotShow(this.dot)
     }
+  }
+  getHiddenProp() {
+    let prefixes = ['webkit', 'moz', 'ms', 'o'];
+    if ('hidden' in document) return 'hidden';
+    for (let i = 0; i < prefixes.length; i++) {
+      if ((prefixes[i] + 'Hidden') in document)
+        return prefixes[i] + 'Hidden';
+    }
+    return null;
+  }
+  getVisibilityState() {
+    let prefixes = ['webkit', 'moz', 'ms', 'o'];
+    if ('visibilityState' in document) return 'visibilityState';
+    for (let i = 0; i < prefixes.length; i++) {
+      if ((prefixes[i] + 'VisibilityState') in document)
+        return prefixes[i] + 'VisibilityState';
+    }
+    return null;
   }
 }
 export default Banner
