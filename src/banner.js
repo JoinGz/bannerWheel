@@ -8,9 +8,16 @@ class Banner {
       interval: 1000
     }
     this.options = Object.assign(this.default, options)
-    this.begin = 0
+    this.begin = 1
     this.dot = 0
     this.mytime = null
+    this.moving = false
+    if (this.options.model === 'phone') {
+      this.x = 0
+      this.dist = 0
+      this.end = 0
+      this.move = 0
+    }
     this.init()
   }
   init() {
@@ -20,6 +27,9 @@ class Banner {
     document.querySelectorAll('#gzBanner .gzBox li').forEach(v => {
       v.style.width = 100 / this.num() + '%'
     })
+    // 初始切换到第二张
+    this.animation(this.$('#gzBanner .gzBox'), `${this.liWidth() * -1}px`, true)
+    this.moveEnd()
     // 显示左右切换
     if (this.options.LR) {
       let doc = document.createDocumentFragment()
@@ -38,7 +48,7 @@ class Banner {
       let ul = document.createElement('ul')
       ul.setAttribute('class', 'point')
       let li = document.createElement('li')
-      let num = this.num() - 1
+      let num = this.num() - 2
       for (let i = 0, l = num; i < l; i++) {
         let myli = li.cloneNode()
         ul.appendChild(myli)
@@ -51,6 +61,39 @@ class Banner {
     if (this.options.model === 'pc' && this.options.LR) {
       this.eventListen(this.$('#gzBanner .gzButl'), 'click', this.gzButl())
       this.eventListen(this.$('#gzBanner .gzButr'), 'click', this.gzButr())
+    }
+    if (this.options.model === 'phone') {
+      this.$('#gzBanner').addEventListener('touchstart', e => {
+        clearInterval(this.mytime)
+        let touch = event.touches[0]
+        this.x = touch.clientX
+      })
+      this.$('#gzBanner').addEventListener('touchmove', e => {
+        let touch = event.touches[0]
+        this.move = touch.clientX - this.x
+        this.animation(
+          this.$('#gzBanner .gzBox'),
+          `${this.move + this.liWidth() * -1 * this.begin}px`,
+          true
+        )
+      })
+      this.$('#gzBanner').addEventListener('touchend', e => {
+        // this.dist = this.move
+        let max = this.liWidth() / 3
+        if (Math.abs(this.move) > max) {
+          if (this.move > 0) {
+            this.gzButl()()
+          } else {
+            this.gzButr()()
+          }
+        } else {
+          this.animation(
+            this.$('#gzBanner .gzBox'),
+            `${this.begin * this.liWidth() * -1}px`,
+            false
+          )
+        }
+      })
     }
     this.istime()
     this.eventListen(this.$('#gzBanner'), 'mouseenter', () => {
@@ -90,34 +133,47 @@ class Banner {
   }
   cloneLi() {
     let liFirst = this.$('#gzBanner .gzBox').children[0].cloneNode(true)
+    let last = this.$('#gzBanner .gzBox').children[
+      this.$('#gzBanner .gzBox').children.length - 1
+    ].cloneNode(true)
+    this.$('#gzBanner .gzBox').insertBefore(
+      last,
+      this.$('#gzBanner .gzBox').firstChild
+    )
     this.$('#gzBanner .gzBox').appendChild(liFirst)
   }
   animation(ele, m, bool) {
-    if (bool === true) {
-      ele.style.transition = ''
-      ele.style.transform = `translateX(${m})`
-    } else if (bool === false) {
-      ele.style.transform = `translateX(${m})`
-      ele.style.transition = 'all 0.5s'
-    }
+      this.moving = true
+      if (bool === true) {
+        ele.style.transition = ''
+        ele.style.transform = `translateX(${m})`
+      } else if (bool === false) {
+        ele.style.transform = `translateX(${m})`
+        ele.style.transition = 'all 0.5s'
+      }
   }
   dotShow(num) {
     document.querySelectorAll('#gzBanner .point li').forEach((v, i) => {
       v.className = ''
-      v.myIndex = i
+      let a = i
+      v.myIndex = ++a
       if (i == num) {
         v.className = 'active'
       }
     })
   }
   clickDot() {
-    this.eventListen(this.$('#gzBanner .point'), 'click', (e) => {
+    this.eventListen(this.$('#gzBanner .point'), 'click', e => {
       let ele = e || window.event
       let target = ele.target || ele.srcElement
       if (target.nodeName.toLocaleLowerCase() === 'li') {
-        this.animation(this.$('#gzBanner .gzBox'), `${this.liWidth() * target.myIndex * -1}px`, false)
+        this.animation(
+          this.$('#gzBanner .gzBox'),
+          `${this.liWidth() * target.myIndex * -1}px`,
+          false
+        )
         this.begin = target.myIndex
-        this.dot = target.myIndex
+        this.dot = target.myIndex - 1
         this.dotShow(this.dot)
       }
     })
@@ -152,10 +208,17 @@ class Banner {
         clearInterval(this.mytime)
       }
     }
-
   }
   gzButl() {
+    
+    
+    // if(this.moving){
+    //   return ()=>{}
+    // }
     return () => {
+      console.log(this.moving);
+      
+      if(!this.moving){
       let ele = this.$('#gzBanner .gzBox')
       this.begin--
       this.dot--
@@ -163,11 +226,11 @@ class Banner {
         // this.$('#gzBanner .gzBox').style.transition = ''
         // this.$('#gzBanner .gzBox').style.transform = `translateX(${(this.num() -1) * this.liWidth() *-1}px)`
         // this.$('#gzBanner .gzBox').style.left = `${(this.num() -1) * this.liWidth() *-1}px`
-        this.begin = this.num() - 2
-        this.animation(ele, `${(this.num() - 1) * this.liWidth() * -1}px`, true)
+        // this.begin = this.num() - 3
+        // this.animation(ele, `${(this.num() - 2) * this.liWidth() * -1}px`, true)
       }
       if (this.dot < 0) {
-        this.dot = this.num() - 2
+        this.dot = this.num() - 3
       }
       this.animation(ele, `${this.begin * -this.liWidth()}px`, false)
       this.dotShow(this.dot)
@@ -175,25 +238,25 @@ class Banner {
       // this.$('#gzBanner .gzBox').style.transition = 'all 0.5s'
       // this.$('#gzBanner .gzBox').style.transform = `translateX(${this.begin * -this.liWidth()*-1}px)`
     }
+    }
   }
   gzButr() {
     return () => {
       let ele = this.$('#gzBanner .gzBox')
       this.begin++
       this.dot++
-      if (this.begin > this.num() - 1) {
+      if (this.begin > this.num() - 2) {
         // let fn = () => {
         //   this.animation(ele, `0px`, true)
         // }
         // if (this.begin > this.num() - 2) {
         //   ele.addEventListener('transitionend', fn)
         // }
-        this.animation(ele, `0px`, true)
-        this.begin = 1
-
+        // this.animation(ele, `0px`, true)
+        // this.begin = 1
         // ele.removeEventListener('transitionend', fn)
       }
-      if (this.dot > this.num() - 2) {
+      if (this.dot > this.num() - 3) {
         this.dot = 0
       }
       this.animation(ele, `${this.begin * -this.liWidth()}px`, false)
@@ -201,22 +264,40 @@ class Banner {
     }
   }
   getHiddenProp() {
-    let prefixes = ['webkit', 'moz', 'ms', 'o'];
-    if ('hidden' in document) return 'hidden';
+    let prefixes = ['webkit', 'moz', 'ms', 'o']
+    if ('hidden' in document) return 'hidden'
     for (let i = 0; i < prefixes.length; i++) {
-      if ((prefixes[i] + 'Hidden') in document)
-        return prefixes[i] + 'Hidden';
+      if (prefixes[i] + 'Hidden' in document) return prefixes[i] + 'Hidden'
     }
-    return null;
+    return null
   }
   getVisibilityState() {
-    let prefixes = ['webkit', 'moz', 'ms', 'o'];
-    if ('visibilityState' in document) return 'visibilityState';
+    let prefixes = ['webkit', 'moz', 'ms', 'o']
+    if ('visibilityState' in document) return 'visibilityState'
     for (let i = 0; i < prefixes.length; i++) {
-      if ((prefixes[i] + 'VisibilityState') in document)
-        return prefixes[i] + 'VisibilityState';
+      if (prefixes[i] + 'VisibilityState' in document)
+        return prefixes[i] + 'VisibilityState'
     }
-    return null;
+    return null
+  }
+  moveEnd() {
+    let ele = this.$('#gzBanner .gzBox')
+    ele.addEventListener('webkitTransitionEnd', () => {
+      this.moving = false
+      console.log('---');
+      console.log(this.moving);
+      
+      
+      if (this.begin > this.num() - 2) {
+        this.animation(ele, `${this.liWidth() * -1}px`, true)
+        this.begin = 1
+        this.moving = false
+      } else if (this.begin < 1) {
+        this.begin = this.num() - 2
+        this.animation(ele, `${(this.num() - 2) * this.liWidth() * -1}px`, true)
+        this.moving = false
+      }
+    })
   }
 }
 export default Banner
