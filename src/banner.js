@@ -18,6 +18,13 @@ class Banner {
       this.end = 0
       this.move = 0
     }
+    this.cssName = ''
+    this.transName = ''
+    if (this.has3d('translate3d(1px,0,0)')) {
+      this.d3 = 'd3'
+    } else if (this.has3d('translateX(1px)') && this.checkCss('transition')) {
+      this.d3 = 'X'
+    }
     this.init()
   }
   init() {
@@ -143,14 +150,33 @@ class Banner {
     this.$('#gzBanner .gzBox').appendChild(liFirst)
   }
   animation(ele, m, bool) {
-      this.moving = true
+    this.moving = true
+    if (this.d3 === 'd3') {
       if (bool === true) {
         ele.style.transition = ''
-        ele.style.transform = `translateX(${m})`
+        ele.style[this.cssName] = `translate3d(${m},0,0)`
+        this.moving = false
       } else if (bool === false) {
-        ele.style.transform = `translateX(${m})`
+        ele.style[this.cssName] = `translate3d(${m},0,0)`
         ele.style.transition = 'all 0.5s'
       }
+    } else if (this.d3 === 'X') {
+      if (bool === true) {
+        ele.style[this.transName] = ''
+        ele.style[this.cssName] = `translateX(${m})`
+        this.moving = false
+      } else if (bool === false) {
+        ele.style[this.cssName] = `translateX(${m})`
+        ele.style[this.transName] = 'all 0.5s'
+      }
+    }
+    // if (bool === true) {
+    //   ele.style.transition = ''
+    //   ele.style.transform = `translateX(${m})`
+    // } else if (bool === false) {
+    //   ele.style.transform = `translateX(${m})`
+    //   ele.style.transition = 'all 0.5s'
+    // }
   }
   dotShow(num) {
     document.querySelectorAll('#gzBanner .point li').forEach((v, i) => {
@@ -210,57 +236,52 @@ class Banner {
     }
   }
   gzButl() {
-    
-    
-    // if(this.moving){
-    //   return ()=>{}
-    // }
     return () => {
-      console.log(this.moving);
-      
-      if(!this.moving){
-      let ele = this.$('#gzBanner .gzBox')
-      this.begin--
-      this.dot--
-      if (this.begin < 0) {
-        // this.$('#gzBanner .gzBox').style.transition = ''
-        // this.$('#gzBanner .gzBox').style.transform = `translateX(${(this.num() -1) * this.liWidth() *-1}px)`
-        // this.$('#gzBanner .gzBox').style.left = `${(this.num() -1) * this.liWidth() *-1}px`
-        // this.begin = this.num() - 3
-        // this.animation(ele, `${(this.num() - 2) * this.liWidth() * -1}px`, true)
+      if (!this.moving) {
+        let ele = this.$('#gzBanner .gzBox')
+        this.begin--
+        this.dot--
+        if (this.begin < 0) {
+          // this.$('#gzBanner .gzBox').style.transition = ''
+          // this.$('#gzBanner .gzBox').style.transform = `translateX(${(this.num() -1) * this.liWidth() *-1}px)`
+          // this.$('#gzBanner .gzBox').style.left = `${(this.num() -1) * this.liWidth() *-1}px`
+          // this.begin = this.num() - 3
+          // this.animation(ele, `${(this.num() - 2) * this.liWidth() * -1}px`, true)
+        }
+        if (this.dot < 0) {
+          this.dot = this.num() - 3
+        }
+        this.animation(ele, `${this.begin * -this.liWidth()}px`, false)
+        this.dotShow(this.dot)
+        // this.$('#gzBanner .gzBox').style.transform = 'translateX('+this.begin * -this.liWidth() + 'px)'
+        // this.$('#gzBanner .gzBox').style.transition = 'all 0.5s'
+        // this.$('#gzBanner .gzBox').style.transform = `translateX(${this.begin * -this.liWidth()*-1}px)`
       }
-      if (this.dot < 0) {
-        this.dot = this.num() - 3
-      }
-      this.animation(ele, `${this.begin * -this.liWidth()}px`, false)
-      this.dotShow(this.dot)
-      // this.$('#gzBanner .gzBox').style.transform = 'translateX('+this.begin * -this.liWidth() + 'px)'
-      // this.$('#gzBanner .gzBox').style.transition = 'all 0.5s'
-      // this.$('#gzBanner .gzBox').style.transform = `translateX(${this.begin * -this.liWidth()*-1}px)`
-    }
     }
   }
   gzButr() {
     return () => {
-      let ele = this.$('#gzBanner .gzBox')
-      this.begin++
-      this.dot++
-      if (this.begin > this.num() - 2) {
-        // let fn = () => {
-        //   this.animation(ele, `0px`, true)
-        // }
-        // if (this.begin > this.num() - 2) {
-        //   ele.addEventListener('transitionend', fn)
-        // }
-        // this.animation(ele, `0px`, true)
-        // this.begin = 1
-        // ele.removeEventListener('transitionend', fn)
+      if (!this.moving) {
+        let ele = this.$('#gzBanner .gzBox')
+        this.begin++
+        this.dot++
+        if (this.begin > this.num() - 2) {
+          // let fn = () => {
+          //   this.animation(ele, `0px`, true)
+          // }
+          // if (this.begin > this.num() - 2) {
+          //   ele.addEventListener('transitionend', fn)
+          // }
+          // this.animation(ele, `0px`, true)
+          // this.begin = 1
+          // ele.removeEventListener('transitionend', fn)
+        }
+        if (this.dot > this.num() - 3) {
+          this.dot = 0
+        }
+        this.animation(ele, `${this.begin * -this.liWidth()}px`, false)
+        this.dotShow(this.dot)
       }
-      if (this.dot > this.num() - 3) {
-        this.dot = 0
-      }
-      this.animation(ele, `${this.begin * -this.liWidth()}px`, false)
-      this.dotShow(this.dot)
     }
   }
   getHiddenProp() {
@@ -284,20 +305,63 @@ class Banner {
     let ele = this.$('#gzBanner .gzBox')
     ele.addEventListener('webkitTransitionEnd', () => {
       this.moving = false
-      console.log('---');
-      console.log(this.moving);
-      
-      
       if (this.begin > this.num() - 2) {
         this.animation(ele, `${this.liWidth() * -1}px`, true)
         this.begin = 1
-        this.moving = false
       } else if (this.begin < 1) {
         this.begin = this.num() - 2
         this.animation(ele, `${(this.num() - 2) * this.liWidth() * -1}px`, true)
-        this.moving = false
       }
     })
+  }
+  checkCss(name) {
+    var arr = ['webkit', 'Moz', 'ms', 'o']
+    if (name in document.body.style) {
+      this.transName = name
+      return name
+    }
+    var myname = name.slice(0, 1).toUpperCase() + name.slice(1)
+    console.log(myname)
+
+    for (var i = 0, l = 4; i < l; i++) {
+      var cssName = arr[i] + myname
+      if (cssName in document.body.style) {
+        this.transName = cssName
+        return true
+      }
+    }
+    return false
+  }
+  has3d(name) {
+    let cssName
+    if (!window.getComputedStyle) {
+      return false
+    }
+    var el = document.createElement('p'),
+      has3d,
+      transforms = {
+        transform: 'transform',
+        webkitTransform: '-webkit-transform',
+        msTransform: '-ms-transform',
+        OTransform: '-o-transform',
+        MozTransform: '-moz-transform'
+      }
+    document.body.insertBefore(el, null)
+    for (var t in transforms) {
+      if (el.style[t] !== undefined) {
+        el.style[t] = name
+        has3d = window.getComputedStyle(el).getPropertyValue(transforms[t])
+        if (has3d) {
+          cssName = transforms[t]
+          break
+        }
+      }
+    }
+    document.body.removeChild(el)
+    if (has3d !== undefined && has3d.length > 0 && has3d !== 'none') {
+      this.cssName = cssName
+    }
+    return has3d !== undefined && has3d.length > 0 && has3d !== 'none'
   }
 }
 export default Banner
