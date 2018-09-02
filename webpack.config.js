@@ -1,6 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 module.exports = {
+  // entry: ['babel-polyfill','./src/index.js'], //入口文件
   entry: './src/index.js', //入口文件
   output: {
     filename: 'my.js', //输出文件名
