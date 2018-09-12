@@ -106,16 +106,16 @@ class Banner {
         }
       })
     }
-    this.istime()
+    // this.istime()
     this.eventListen(this.$('#gzBanner'), 'mouseenter', () => {
       clearInterval(this.mytime)
     })
-    this.eventListen(this.$('#gzBanner'), 'mouseleave', () => {
-      clearInterval(this.mytime)
-      this.mytime = setInterval(() => {
-        this.gzButr()()
-      }, this.options.interval)
-    })
+    // this.eventListen(this.$('#gzBanner'), 'mouseleave', () => {
+    //   clearInterval(this.mytime)
+    //   this.mytime = setInterval(() => {
+    //     this.gzButr()()
+    //   }, this.options.interval)
+    // })
   }
   liWidth() {
     return parseInt(this.getStyle(this.$('#gzBanner .gzBox li'), 'width'))
@@ -158,7 +158,8 @@ class Banner {
     if (this.d3 === 'd3') {
       if (bool === true) {
         ele.style.transition = ''
-        ele.style[this.cssName] = `translate3d(${m},0,0)`
+        // ele.style[this.cssName] = `translate3d(${m},0,0)` //会闪一下
+        ele.style[this.cssName] = `translateX(${m})`
         this.moving = false
       } else if (bool === false) {
         ele.style[this.cssName] = `translate3d(${m},0,0)`
@@ -314,6 +315,7 @@ class Banner {
   gzButr() {
     return () => {
       // console.log('点击了');
+      console.log(`右边点击 = ${this.moving}`);
       if (!this.moving) {
         let ele = this.$('#gzBanner .gzBox')
         this.begin++
