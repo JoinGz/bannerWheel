@@ -7,9 +7,11 @@ class Banner {
       model: 'pc',
       interval: 1000
     }
-    this.options = Object.assign(this.default, options)
+    // this.options = Object.assign(this.default, options)
+    this.options = this.myAssign(this.default, options)
     this.begin = 1
     this.dot = 0
+    this.nowDot = null
     this.mytime = null
     this.moving = false
     if (this.options.model === 'phone') {
@@ -22,11 +24,15 @@ class Banner {
     this.reqAni()
     this.cssName = ''
     this.transName = ''
+    this.dotDir = null
+    console.log(this.endName)
+
     if (this.has3d('translate3d(1px,0,0)')) {
       this.d3 = 'd3'
+      // this.d3 = ''
     } else if (this.has3d('translateX(1px)') && this.checkCss('transition')) {
       this.d3 = 'X'
-    }else {
+    } else {
       this.d3 = 'IE9'
     }
     this.init()
@@ -106,19 +112,22 @@ class Banner {
         }
       })
     }
-    // this.istime()
+    this.istime()
     this.eventListen(this.$('#gzBanner'), 'mouseenter', () => {
       clearInterval(this.mytime)
     })
-    // this.eventListen(this.$('#gzBanner'), 'mouseleave', () => {
-    //   clearInterval(this.mytime)
-    //   this.mytime = setInterval(() => {
-    //     this.gzButr()()
-    //   }, this.options.interval)
-    // })
+    this.eventListen(this.$('#gzBanner'), 'mouseleave', () => {
+      clearInterval(this.mytime)
+      this.mytime = setInterval(() => {
+        this.gzButr()()
+      }, this.options.interval)
+    })
   }
   liWidth() {
-    return parseInt(this.getStyle(this.$('#gzBanner .gzBox li'), 'width'))
+    // IE返回的是20% ...
+    // return parseInt(this.getStyle(this.$('#gzBanner .gzBox li'), 'width'))
+    return parseInt(this.$('#gzBanner .gzBox li').offsetWidth)
+
   }
   num() {
     return this.$('#gzBanner .gzBox').children.length
@@ -174,55 +183,88 @@ class Banner {
         ele.style[this.cssName] = `translateX(${m})`
         ele.style[this.transName] = 'all 0.5s'
       }
-    }else {
+    } else {
       // let u = parseInt(this.getStyle(ele,'left'))
-    let change = () => {
-      console.log('1');
-      
-      if(bool === false){
-        // console.log('准备开始变化');
-      let num 
-      this.aniNum = window.requestAnimationFrame(change)
-      console.log(parseInt(this.getStyle(ele,'left')) +' '+ Math.abs(parseInt(m)));
-      // console.log((u - parseInt(m))/15);
-      
-      // let x = parseInt((parseInt(m)/30))
-      // let a = parseInt((u - parseInt(m))/15)
-      if(parseInt(this.getStyle(ele,'left')) - parseInt(m) > 0){
-        num = -100
-      }else{
-        num =  100
+      let change = () => {
+        // console.log('1')
+        if (bool === false) {
+          // console.log('准备开始变化');
+          let num
+          this.aniNum = window.requestAnimationFrame(change)
+          // console.log(
+          //   parseInt(this.getStyle(ele, 'left')) + ' ' + Math.abs(parseInt(m))
+          // )
+          // console.log((u - parseInt(m))/15);
+          // let x = parseInt((parseInt(m)/30))
+          // let a = parseInt((u - parseInt(m))/15)
+          if (parseInt(this.getStyle(ele, 'left')) - parseInt(m) > 0) {
+            num = -40
+          } else {
+            num = 40
+          }
+          // console.log('num------------------------');
+          // console.log(num);
+          let now = parseInt(this.getStyle(ele, 'left'))
+          now += num
+          ele.style.left = `${now}px`
+          // console.log('现在是小于');
+          if (
+            Math.abs(parseInt(this.getStyle(ele, 'left')) - parseInt(m)) <=
+            Math.abs(num)
+          ) {
+            ele.style.left = `${parseInt(m)}px`
+            this.moving = false
+            // console.log('大于');
+            window.cancelAnimationFrame(this.aniNum)
+            if (this.dotDir === 'left') {
+              this.$('#gzBanner .gzBox').removeChild(
+                document.querySelectorAll('#gzBanner .gzBox li')[this.begin]
+              )
+              this.animation(
+                this.$('#gzBanner .gzBox'),
+                `${this.liWidth() * -1 * this.nowDot}px`,
+                true
+              )
+              this.begin = this.nowDot
+              this.dot = this.nowDot - 1
+              this.dotShow(this.dot)
+              this.dotDir = null
+            } else if (this.dotDir === 'right') {
+              this.$('#gzBanner .gzBox').removeChild(
+                document.querySelectorAll('#gzBanner .gzBox li')[this.begin + 1]
+              )
+              this.animation(
+                this.$('#gzBanner .gzBox'),
+                `${this.liWidth() * -1 * this.nowDot}px`,
+                true
+              )
+              this.begin = this.nowDot
+              this.dot = this.nowDot - 1
+              this.dotShow(this.dot)
+              this.dotDir = null
+            }
+
+            if (this.begin > this.num() - 2) {
+              this.animation(ele, `${this.liWidth() * -1}px`, true)
+              this.begin = 1
+            } else if (this.begin < 1) {
+              this.begin = this.num() - 2
+              this.animation(
+                ele,
+                `${(this.num() - 2) * this.liWidth() * -1}px`,
+                true
+              )
+            }
+          }
+        } else if (bool === true) {
+          // console.log('---');
+          ele.style.left = m
+          this.moving = false
+        }
       }
-      // console.log('num------------------------');
-      // console.log(num);
-      let now = parseInt(this.getStyle(ele,'left'))
-      now += num
-      ele.style.left = `${now}px`
-      // console.log('现在是小于');
-      if(Math.abs(parseInt(this.getStyle(ele,'left')) - parseInt(m))<=Math.abs(num)){
-      ele.style.left = `${parseInt(m)}px`
-        this.moving = false
-        // console.log('大于');
-        window.cancelAnimationFrame(this.aniNum)
-      if (this.begin > this.num() - 2) {
-        this.animation(ele, `${this.liWidth() * -1}px`, true)
-        this.begin = 1
-      } else if (this.begin < 1) {
-        this.begin = this.num() - 2
-        this.animation(ele, `${(this.num() - 2) * this.liWidth() * -1}px`, true)
-      }
-      }
-      }else if (bool === true){
-        // console.log('---');
-        
-        ele.style.left = m
-        this.moving = false
-      }
-      
+      change()
     }
-    change()
-    }
-    
+
     // if (bool === true) {
     //   ele.style.transition = ''
     //   ele.style.transform = `translateX(${m})`
@@ -245,15 +287,106 @@ class Banner {
     this.eventListen(this.$('#gzBanner .point'), 'click', e => {
       let ele = e || window.event
       let target = ele.target || ele.srcElement
+      console.log(`上一张图片：${this.begin}`)
+      console.log(`当前的圆点index:${target.myIndex}`)
+      // 点击同一圆点就不用进来了
+      if (this.begin === target.myIndex) {
+        return
+      }
       if (target.nodeName.toLocaleLowerCase() === 'li') {
-        this.animation(
-          this.$('#gzBanner .gzBox'),
-          `${this.liWidth() * target.myIndex * -1}px`,
-          false
-        )
-        this.begin = target.myIndex
-        this.dot = target.myIndex - 1
-        this.dotShow(this.dot)
+        if (this.begin > target.myIndex) {
+          this.dotDir = 'left'
+          console.log('jinlail')
+          let li = document.querySelectorAll('#gzBanner .gzBox li')
+          let ele = li[target.myIndex].cloneNode(true)
+          ele.className += '1'
+          this.$('#gzBanner .gzBox').insertBefore(ele, li[this.begin])
+          // console.log(this.begin)
+          // console.log(this.liWidth())
+          console.log(`进来时候的之前的图片${this.begin}`)
+          console.log(`进来时候的圆点${target.myIndex}`)
+          this.nowDot = target.myIndex
+
+          // setTimeout(() => {
+          // console.log(this.liWidth() * -1 * this.begin);
+          // console.log('--------------')
+          // console.log(this.liWidth())
+          this.animation(
+            this.$('#gzBanner .gzBox'),
+            `${this.liWidth() * -1 * (this.begin + 1)}px`,
+            true
+          )
+          this.animation(
+            this.$('#gzBanner .gzBox'),
+            `${this.liWidth() * -1 * this.begin}px`,
+            false
+          )
+          // }, 0);
+
+          // setTimeout(() => {
+          //   this.$('#gzBanner .gzBox').removeChild(
+          //     document.querySelectorAll('#gzBanner .gzBox li')[this.begin]
+          //   )
+          //   this.animation(
+          //     this.$('#gzBanner .gzBox'),
+          //     `${this.liWidth() * -1 * target.myIndex}px`,
+          //     true
+          //   )
+          //   this.begin = target.myIndex
+          //   this.dot = target.myIndex - 1
+          //   this.dotShow(this.dot)
+          // }, 500)
+        } else if (this.begin < target.myIndex) {
+          console.log('jinlail')
+          this.dotDir = 'right'
+          let li = document.querySelectorAll('#gzBanner .gzBox li')
+          let ele = li[target.myIndex].cloneNode(true)
+          ele.className += ' 2'
+          this.$('#gzBanner .gzBox').insertBefore(ele, li[this.begin + 1])
+          console.log(`进来时候的之前的图片${this.begin}`)
+          console.log(`进来时候的圆点${target.myIndex}`)
+          this.nowDot = target.myIndex
+          // console.log(this.liWidth())
+          // setTimeout(() => {
+          // console.log(this.liWidth() * -1 * this.begin);
+          // console.log('--------------')
+          // console.log(this.liWidth())
+          // this.animation(
+          //   this.$('#gzBanner .gzBox'),
+          //   `${this.liWidth() * -1 * (this.begin + 1)}px`,
+          //   true
+          // )
+          this.animation(
+            this.$('#gzBanner .gzBox'),
+            `${this.liWidth() * -1 * (this.begin + 1)}px`,
+            false
+          )
+          // }, 0);
+
+          // setTimeout(() => {
+          //   this.$('#gzBanner .gzBox').removeChild(
+          //     document.querySelectorAll('#gzBanner .gzBox li')[this.begin + 1]
+          //   )
+          //   this.animation(
+          //     this.$('#gzBanner .gzBox'),
+          //     `${this.liWidth() * -1 * target.myIndex}px`,
+          //     true
+          //   )
+          //   this.begin = target.myIndex
+          //   this.dot = target.myIndex - 1
+          //   this.dotShow(this.dot)
+          // }, 500)
+        } else {
+          // -- yuan ban --
+          this.animation(
+            this.$('#gzBanner .gzBox'),
+            `${this.liWidth() * target.myIndex * -1}px`,
+            false
+          )
+          this.begin = target.myIndex
+          this.dot = target.myIndex - 1
+          this.dotShow(this.dot)
+        }
       }
     })
   }
@@ -290,7 +423,7 @@ class Banner {
   }
   gzButl() {
     return () => {
-      if (!this.moving) {        
+      if (!this.moving) {
         let ele = this.$('#gzBanner .gzBox')
         this.begin--
         this.dot--
@@ -315,7 +448,6 @@ class Banner {
   gzButr() {
     return () => {
       // console.log('点击了');
-      console.log(`右边点击 = ${this.moving}`);
       if (!this.moving) {
         let ele = this.$('#gzBanner .gzBox')
         this.begin++
@@ -358,7 +490,7 @@ class Banner {
   }
   moveEnd() {
     let ele = this.$('#gzBanner .gzBox')
-    ele.addEventListener('webkitTransitionEnd', () => {
+    ele.addEventListener('transitionend', () => {
       this.moving = false
       if (this.begin > this.num() - 2) {
         this.animation(ele, `${this.liWidth() * -1}px`, true)
@@ -366,6 +498,33 @@ class Banner {
       } else if (this.begin < 1) {
         this.begin = this.num() - 2
         this.animation(ele, `${(this.num() - 2) * this.liWidth() * -1}px`, true)
+      }
+      if (this.dotDir === 'left') {
+        this.$('#gzBanner .gzBox').removeChild(
+          document.querySelectorAll('#gzBanner .gzBox li')[this.begin]
+        )
+        this.animation(
+          this.$('#gzBanner .gzBox'),
+          `${this.liWidth() * -1 * this.nowDot}px`,
+          true
+        )
+        this.begin = this.nowDot
+        this.dot = this.nowDot - 1
+        this.dotShow(this.dot)
+        this.dotDir = null
+      } else if (this.dotDir === 'right') {
+        this.$('#gzBanner .gzBox').removeChild(
+          document.querySelectorAll('#gzBanner .gzBox li')[this.begin + 1]
+        )
+        this.animation(
+          this.$('#gzBanner .gzBox'),
+          `${this.liWidth() * -1 * this.nowDot}px`,
+          true
+        )
+        this.begin = this.nowDot
+        this.dot = this.nowDot - 1
+        this.dotShow(this.dot)
+        this.dotDir = null
       }
     })
   }
@@ -376,8 +535,6 @@ class Banner {
       return name
     }
     var myname = name.slice(0, 1).toUpperCase() + name.slice(1)
-    console.log(myname)
-
     for (var i = 0, l = 4; i < l; i++) {
       var cssName = arr[i] + myname
       if (cssName in document.body.style) {
@@ -418,31 +575,44 @@ class Banner {
     }
     return has3d !== undefined && has3d.length > 0 && has3d !== 'none'
   }
-   reqAni (){
-    if(window.requestAnimationFrame && window.cancelAnimationFrame){
-      return ;
+  reqAni() {
+    if (window.requestAnimationFrame && window.cancelAnimationFrame) {
+      return
     }
-    let lastTime = 0;
-    let vendors = ['webkit', 'moz'];
-    for(let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-      window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-      window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+    let lastTime = 0
+    let vendors = ['webkit', 'moz']
+    for (let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+      window.requestAnimationFrame =
+        window[vendors[x] + 'RequestAnimationFrame']
+      window.cancelAnimationFrame =
+        window[vendors[x] + 'CancelAnimationFrame'] ||
+        window[vendors[x] + 'CancelRequestAnimationFrame']
     }
-    if(!window.requestAnimationFrame) {
+    if (!window.requestAnimationFrame) {
       window.requestAnimationFrame = function(callback, element) {
         let currTime = new Date().getTime()
-        let timeToCall = Math.max(0, 16.7 - (currTime - lastTime));
+        let timeToCall = Math.max(0, 16.7 - (currTime - lastTime))
         let id = window.setTimeout(function() {
-          callback(currTime + timeToCall);
+          callback(currTime + timeToCall)
         }, timeToCall)
         lastTime = currTime + timeToCall
         return id
-      };
+      }
     }
-    if(!window.cancelAnimationFrame) {
+    if (!window.cancelAnimationFrame) {
       window.cancelAnimationFrame = function(id) {
         clearTimeout(id)
       }
+    }
+  }
+  myAssign (obj,obj2) {
+    if(Object.assign){
+      return Object(obj,obj2)
+    }else{
+      for(let i in obj2){
+        obj[i] = obj2[i]
+      }
+      return obj
     }
   }
 }
