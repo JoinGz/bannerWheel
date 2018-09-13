@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+body {
+  margin: 0;
+}
+
+#gzBanner {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+#gzBanner .clearfix:after {
+  display: block;
+  content: '';
+  clear: both;
+}
+
+#gzBanner ul,
+#gzBanner li {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  position: relative;
+}
+
+#gzBanner .gzBox li {
+  float: left;
+}
+
+#gzBanner a {
+  display: block;
+}
+
+#gzBanner a img {
+  width: 100%;
+}
+
+#gzBanner .gzBut {
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  margin-top: -25px;
+  background: green;
+}
+
+#gzBanner .gzButl {
+  left: 0;
+}
+
+#gzBanner .gzButr {
+  right: 0;
+}
+
+#gzBanner .point {
+  text-align: center;
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+}
+
+#gzBanner .point li {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  display: inline-block;
+  margin-right: 5px;
+}
+
+#gzBanner .point .active {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+#gzBanner .move {
+  transition: all 2s;
+}
+
+  </style>
+</head>
+
+<body>
+  <!-- myBanner -->
+  <div class="yourBox">
+    <div id="gzBanner">
+      <ul class="gzBox clearfix">
+        <li>
+          <a href="javascript:;">
+            <img src="../img/14.jpg" alt="">
+          </a>
+        </li>
+        <li>
+          <a href="javascript:;">
+            <img src="../img/13.jpg" alt="">
+          </a>
+        </li>
+        <li>
+          <a href="javascript:;">
+            <img src="../img/12.jpg" alt="">
+          </a>
+        </li>
+        <li>
+          <a href="javascript:;">
+            <img src="../img/11.jpg" alt="">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</body>
+<script src='./es5.js'></script>
+<script>
+
+  if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function forEach(callback, thisArg) {
+      var T, k;
+      if (this == null) {
+        throw new TypeError("this is null or not defined");
+      }
+      var O = Object(this);
+      var len = O.length >>> 0;
+      if (typeof callback !== "function") {
+        throw new TypeError(callback + " is not a function");
+      }
+      if (arguments.length > 1) {
+        T = thisArg;
+      }
+      k = 0;
+      while (k < len) {
+        var kValue;
+        if (k in O) {
+          kValue = O[k];
+          callback.call(T, kValue, k, O);
+        }
+        k++;
+      }
+    };
+  }
+  function addForEachToNodeList() {
+    if (window.NodeList && !NodeList.prototype.forEach) {
+      NodeList.prototype.forEach = function (callback, thisArg) {
+        thisArg = thisArg || window
+        for (var i = 0; i < this.length; i++) {
+          callback.call(thisArg, this[i], i, this)
+        }
+      }
+    }
+  }
+  addForEachToNodeList()
+  window.onload = function () {
+    new banner({
+      model: 'pc',
+      LR: true,
+      control: true
+    })
+  }
+</script>
+
+</html>
